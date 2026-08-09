@@ -41,7 +41,7 @@ python3 app.py
  
 Then visit http://127.0.0.1:5000
  
-To try it with sample data: run `python3 seed_dummy_data.py` first.
+To try it with sample data: run `python3 seed_dummy_data.py`
 
 
 ## Project Structure
