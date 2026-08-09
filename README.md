@@ -18,7 +18,7 @@ Track expenses, earnings, budgets, and account balances.
 - Create recurring expenses and earnings
 - View summaries through charts and trends
 - Create and manage budget periods with category and method allocations
-- Manage different account balances with transfer support between accounts
+- Manage multiple accounts and transfer funds between accounts
 - Configurable currency in settings
 
 
