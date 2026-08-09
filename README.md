@@ -3,6 +3,7 @@
 A full-featured expense tracker web application built with Python, Flask, and SQLite for tracking expenses, earnings, budgets, and account balances.
 
 **Live demo:** https://expense-tracker-829k.onrender.com
+
 *Hosted on Render's free tier. The first load may take up to a minute.*
 
 
