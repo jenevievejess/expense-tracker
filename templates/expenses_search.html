@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Search Expenses{% endblock %}
+{% block content %}
+<div class="theme-expense">
+
+    <div class="card">
+        <form method="get" action="{{ url_for('expenses_search') }}" style="display: flex; gap: 8px;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search expenses..." autofocus style="flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 999px;">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar b-left-pink">
+            <a href="{{ url_for('expenses_view', view='day') }}">Day</a>
+            <a href="{{ url_for('expenses_view', view='week') }}">Week</a>
+            <a href="{{ url_for('expenses_view', view='month') }}">Month</a>
+        </div>
+
+        <div class="main-content">
+            <div class="card b-top-pink">
+                <h2>Results for "{{ query }}"</h2>
+                {% if results %}
+                    {% for row in results %}
+                        <div class="entry-row">
+                            <span class="bubble bubble-category" style="background-color: {{ category_colors.get(row[2], '#ccc') }};">{{ row[2] }}</span>
+                            <span class="entry-note">{{ row[1] }}{% if row[5] %} — {{ row[5] }}{% endif %}</span>
+                            <span class="bubble bubble-method" style="background-color: {{ method_colors.get(row[4], '#ccc') }};">{{ row[4] }}</span>
+                            <span class="entry-amount expense">-{{ currency_symbol }}{{ "%.2f"|format(row[3]) }}</span>
+                            <a href="{{ url_for('expenses_edit', expense_id=row[0]) }}" class="entry-edit-btn">Edit</a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-muted);">No matches found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

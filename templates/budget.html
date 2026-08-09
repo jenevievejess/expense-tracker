@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Budget - Expense Tracker{% endblock %}
+{% block content %}
+<div class="theme-budget">
+
+    {% if periods %}
+        <div class="period-selector">
+            {% for p in periods %}
+                <a href="{{ url_for('budget_view', period_id=p.id) }}" class="{{ 'active' if selected_period and selected_period.id == p.id else '' }}">
+                    {{ p.label or (p.start_date ~ ' to ' ~ p.end_date) }}
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if selected_period %}
+        <div class="card b-none">
+            <h3>{{ selected_period.label or (selected_period.start_date ~ ' to ' ~ selected_period.end_date) }}</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">{{ selected_period.start_date }} to {{ selected_period.end_date }}</p>
+            <div class="big-number" style="font-size: 2.2rem;">{{ currency_symbol }}{{ "%.2f"|format(remaining_for_period) }}</div>
+            <div class="small-label">remaining of {{ currency_symbol }}{{ "%.2f"|format(selected_period.amount) }} budgeted this period</div>
+        </div>
+
+        <div class="card b-left-pink">
+            <h3>By category</h3>
+            {% if category_progress %}
+                {% for item in category_progress %}
+                    <div class="progress-item">
+                        <div class="progress-item-label">
+                            <span>{{ item.name }}</span>
+                            <span>{{ currency_symbol }}{{ "%.2f"|format(item.spent) }} / {{ currency_symbol }}{{ "%.2f"|format(item.budgeted) }}</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill"
+                                 style="width: {{ [100, (item.spent / item.budgeted * 100) if item.budgeted else 0]|min }}%; background-color: {{ 'var(--danger)' if item.spent > item.budgeted else 'var(--pink-dark)' }};"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No category budgets set for this period.</p>
+            {% endif %}
+        </div>
+
+        <div class="card b-left-green">
+            <h3>By method</h3>
+            {% if method_progress %}
+                {% for item in method_progress %}
+                    <div class="progress-item">
+                        <div class="progress-item-label">
+                            <span>{{ item.name }}</span>
+                            <span>{{ currency_symbol }}{{ "%.2f"|format(item.spent) }} / {{ currency_symbol }}{{ "%.2f"|format(item.budgeted) }}</span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill"
+                                 style="width: {{ [100, (item.spent / item.budgeted * 100) if item.budgeted else 0]|min }}%; background-color: {{ 'var(--danger)' if item.spent > item.budgeted else 'var(--sage-dark)' }};"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No method budgets set for this period.</p>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('budget_edit', period_id=selected_period.id) }}" class="add-button">Edit Budget</a>
+    {% else %}
+        <div class="card b-none">
+            <p>No budget periods yet.</p>
+        </div>
+        <a href="{{ url_for('budget_edit') }}" class="add-button">+ Create Budget</a>
+    {% endif %}
+</div>
+{% endblock %}

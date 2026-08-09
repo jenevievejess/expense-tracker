@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Accounts - Expense Tracker{% endblock %}
+{% block content %}
+<div class="theme-account">
+
+    <div class="card b-full-green">
+        <h3>Total across all accounts</h3>
+        <div class="big-number">{{ currency_symbol }}{{ "%.2f"|format(total_balance) }}</div>
+    </div>
+
+    <div class="card b-left-green">
+        <h2>Your accounts</h2>
+        {% if account_rows %}
+            {% for row in account_rows %}
+                <div class="account-row">
+                    <a href="{{ url_for('account_detail', method_name=row.name) if row.account else url_for('accounts_set', method_name=row.name) }}" class="account-row-left" style="text-decoration: none; flex-grow: 1;">
+                        <span class="bubble bubble-method" style="background-color: {{ row.color }};">{{ row.name }}</span>
+                    </a>
+                    {% if row.account %}
+                        <strong style="margin-right: 8px;">{{ currency_symbol }}{{ "%.2f"|format(row.balance) }}</strong>
+                    {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.85rem; margin-right: 8px;">no balance set</span>
+                    {% endif %}
+                    <a href="{{ url_for('labels_edit', label_id=row.id) }}" class="entry-edit-btn">Edit</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No accounts yet — add one below.</p>
+        {% endif %}
+
+        <a href="{{ url_for('accounts_add') }}" style="display: block; text-align: center; margin-top: 16px; padding: 10px; border-radius: 10px; border: 1px dashed var(--border); color: var(--sage-dark); text-decoration: none; font-weight: 600;">+ Add Account</a>
+    </div>
+
+    <div class="card b-left-pink">
+        <h2>Transfers</h2>
+        {% if transfers %}
+            {% for t in transfers %}
+                <div class="transfer-row">
+                    <span class="transfer-date">{{ t.date_display }}</span>
+                    <span class="bubble bubble-method" style="background-color: {{ method_colors.get(t.from_method, '#ccc') }};">{{ t.from_method }}</span>
+                    <span class="transfer-arrow">&rarr;</span>
+                    <span class="bubble bubble-method" style="background-color: {{ method_colors.get(t.to_method, '#ccc') }};">{{ t.to_method }}</span>
+                    <span class="transfer-note">{{ t.note }}</span>
+                    <span class="transfer-amount">{{ currency_symbol }}{{ "%.2f"|format(t.amount) }}</span>
+                    <a href="{{ url_for('transfer_edit', transfer_id=t.id) }}" class="entry-edit-btn">Edit</a>
+                </div>
+            {% endfor %}
+            {% if has_more_transfers %}
+                <a href="{{ url_for('transfers_all') }}" class="see-all-link">See all transfers &darr;</a>
+            {% endif %}
+        {% else %}
+            <p style="color: var(--text-muted);">No transfers yet.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('transfer_add') }}" class="add-button">+ Add Transfer</a>
+</div>
+{% endblock %}

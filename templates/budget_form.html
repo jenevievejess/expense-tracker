@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if period else "Create" }} Budget{% endblock %}
+{% block content %}
+
+    <div class="card b-full-green" style="max-width: 560px; margin: 0 auto;">
+        <h2>{{ "Edit" if period else "Create" }} Budget Period</h2>
+
+        <form method="post" action="{{ url_for('budget_edit', period_id=period.id) if period else url_for('budget_edit') }}">
+            <div class="form-group">
+                <label for="label">Label (optional)</label>
+                <input type="text" name="label" id="label" value="{{ period.label if period else '' }}" placeholder="e.g. August 2026">
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Start date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ period.start_date if period else default_start }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">End date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ period.end_date if period else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Total budget amount</label>
+                <input type="number" step="0.01" name="amount" id="amount" value="{{ period.amount if period else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="rollover" {{ "checked" if period and period.rollover else "" }} style="width: auto;">
+                    Roll over leftover budget from the previous period
+                </label>
+            </div>
+
+            <h3>Budget by category (optional)</h3>
+            <div id="category-allocations">
+                {% for alloc in category_allocs %}
+                    <div class="allocation-row">
+                        <div class="form-group">
+                            <select name="alloc_category_name">
+                                {% for id, name, color in categories %}
+                                    <option value="{{ name }}" {{ "selected" if name == alloc.name else "" }}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" step="0.01" name="alloc_category_amount" value="{{ alloc.amount }}" placeholder="Amount">
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="allocation-row">
+                    <div class="form-group">
+                        <select name="alloc_category_name">
+                            <option value="">-- choose category --</option>
+                            {% for id, name, color in categories %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" step="0.01" name="alloc_category_amount" placeholder="Amount">
+                    </div>
+                </div>
+            </div>
+            <a href="#" onclick="addRow('category-allocations', 'alloc_category_name', 'alloc_category_amount', {{ categories|map(attribute=1)|list|tojson }}); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another category</a>
+
+            <h3 style="margin-top: 24px;">Budget by method (optional)</h3>
+            <div id="method-allocations">
+                {% for alloc in method_allocs %}
+                    <div class="allocation-row">
+                        <div class="form-group">
+                            <select name="alloc_method_name">
+                                {% for id, name, color in methods %}
+                                    <option value="{{ name }}" {{ "selected" if name == alloc.name else "" }}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" step="0.01" name="alloc_method_amount" value="{{ alloc.amount }}" placeholder="Amount">
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="allocation-row">
+                    <div class="form-group">
+                        <select name="alloc_method_name">
+                            <option value="">-- choose method --</option>
+                            {% for id, name, color in methods %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" step="0.01" name="alloc_method_amount" placeholder="Amount">
+                    </div>
+                </div>
+            </div>
+            <a href="#" onclick="addRow('method-allocations', 'alloc_method_name', 'alloc_method_amount', {{ methods|map(attribute=1)|list|tojson }}); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another method</a>
+
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <a href="{{ url_for('budget_view') }}" class="btn-cancel">Cancel</a>
+                    {% if period %}
+                        <button type="submit" formaction="{{ url_for('budget_delete', period_id=period.id) }}" class="btn btn-danger" onclick="return confirm('Delete this budget period?');">Delete</button>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary">Save Budget</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function addRow(containerId, selectName, inputName, options) {
+            const container = document.getElementById(containerId);
+            const row = document.createElement('div');
+            row.className = 'allocation-row';
+
+            let optionsHtml = '<option value="">-- choose --</option>';
+            options.forEach(o => { optionsHtml += `<option value="${o}">${o}</option>`; });
+
+            row.innerHTML = `
+                <div class="form-group"><select name="${selectName}">${optionsHtml}</select></div>
+                <div class="form-group"><input type="number" step="0.01" name="${inputName}" placeholder="Amount"></div>
+            `;
+            container.appendChild(row);
+        }
+    </script>
+
+{% endblock %}

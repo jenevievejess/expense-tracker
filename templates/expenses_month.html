@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Expenses - Month{% endblock %}
+{% block content %}
+<div class="theme-expense">
+
+    <div class="page-search-bar">
+        <a href="{{ url_for('recurring_view') }}" class="recurring-link">&#128257; Recurring</a>
+        <button type="button" class="search-toggle" onclick="document.getElementById('searchForm').classList.toggle('open'); document.getElementById('searchInput').focus();">&#128269;</button>
+        <form id="searchForm" method="get" action="{{ url_for('expenses_search') }}" class="search-expand-form">
+            <input id="searchInput" type="text" name="q" placeholder="Search expenses...">
+        </form>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar b-left-pink">
+            <a href="{{ url_for('expenses_view', view='day') }}">Day</a>
+            <a href="{{ url_for('expenses_view', view='week') }}">Week</a>
+            <a href="{{ url_for('expenses_view', view='month') }}" class="active">Month</a>
+        </div>
+
+        <div class="main-content">
+            <div class="card b-full-pink">
+                <div class="calendar-nav">
+                    <a href="{{ url_for('expenses_view', view='month', date=prev_month_str + '-01') }}">&larr; Prev</a>
+                    <h2>{{ month_display }}</h2>
+                    <a href="{{ url_for('expenses_view', view='month', date=next_month_str + '-01') }}">Next &rarr;</a>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="calendar-weekday">Mon</div>
+                    <div class="calendar-weekday">Tue</div>
+                    <div class="calendar-weekday">Wed</div>
+                    <div class="calendar-weekday">Thu</div>
+                    <div class="calendar-weekday">Fri</div>
+                    <div class="calendar-weekday">Sat</div>
+                    <div class="calendar-weekday">Sun</div>
+
+                    {% for week in grid %}
+                        {% for day in week %}
+                            {% if day == 0 %}
+                                <div class="calendar-cell empty"></div>
+                            {% else %}
+                                {% set day_str = "%04d-%02d-%02d"|format(year, month, day) %}
+                                <a href="{{ url_for('expenses_view', view='day', date=day_str) }}" class="calendar-cell">
+                                    <div class="calendar-day-num">{{ day }}</div>
+                                    {% if totals_by_day.get(day_str) %}
+                                        <div class="calendar-day-total">-{{ currency_symbol }}{{ "%.0f"|format(totals_by_day[day_str]) }}</div>
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+
+                <hr>
+                <p><strong>Month total: <span style="color: var(--pink-dark);">{{ currency_symbol }}{{ "%.2f"|format(total) }}</span></strong></p>
+            </div>
+
+            <div class="card b-none">
+                <div class="chart-row">
+                    <div class="chart-box">
+                        <h4>By category</h4>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h4>By method</h4>
+                        <canvas id="methodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{{ url_for('expenses_add', date=month_str + '-01') }}" class="add-button">+ Add Expense</a>
+</div>
+
+<script>
+    function colorsFor(labels, colorMap) { return labels.map(l => colorMap[l] || '#ccc'); }
+    const categoryColors = {{ category_colors | tojson }};
+    const methodColors = {{ method_colors | tojson }};
+
+    const catLabels = {{ by_category | map(attribute=0) | list | tojson }};
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: { labels: catLabels, datasets: [{ data: {{ by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(catLabels, categoryColors) }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+
+    const methLabels = {{ by_method | map(attribute=0) | list | tojson }};
+    new Chart(document.getElementById('methodChart'), {
+        type: 'pie',
+        data: { labels: methLabels, datasets: [{ data: {{ by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(methLabels, methodColors) }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+</script>
+{% endblock %}

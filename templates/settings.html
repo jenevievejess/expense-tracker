@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Settings - Expense Tracker{% endblock %}
+{% block content %}
+
+    <div class="card b-full-green">
+        <h2>Recurring transactions</h2>
+        <a href="{{ url_for('recurring_view') }}" class="btn btn-primary" style="text-decoration: none; display: inline-block;">Manage recurring transactions</a>
+    </div>
+
+    <div class="card b-none">
+        <h2>Currency</h2>
+        <form method="post" action="{{ url_for('settings_currency') }}" style="display: flex; gap: 8px; align-items: center;">
+            <select name="currency" style="flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;">
+                {% for code, symbol in currencies.items() %}
+                    <option value="{{ code }}" {{ "selected" if code == currency_code else "" }}>{{ code }} ({{ symbol }})</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+
+    <div class="card b-left-pink">
+        <h2>Categories</h2>
+        {% if categories %}
+            {% for id, name, color in categories %}
+                <div class="account-row">
+                    <span class="bubble bubble-category" style="background-color: {{ color }};">{{ name }}</span>
+                    <a href="{{ url_for('labels_edit', label_id=id) }}" class="entry-edit-btn">Edit</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No categories yet — add one below.</p>
+        {% endif %}
+
+        <a href="{{ url_for('category_add_page') }}" style="display: block; text-align: center; margin-top: 16px; padding: 10px; border-radius: 10px; border: 1px dashed var(--border); color: var(--pink-dark); text-decoration: none; font-weight: 600;">+ Add Category</a>
+    </div>
+
+{% endblock %}

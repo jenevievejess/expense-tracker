@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Earnings - Day{% endblock %}
+{% block content %}
+<div class="theme-earning">
+
+    <div class="page-search-bar">
+        <a href="{{ url_for('recurring_view') }}" class="recurring-link">&#128257; Recurring</a>
+        <button type="button" class="search-toggle" onclick="document.getElementById('searchForm').classList.toggle('open'); document.getElementById('searchInput').focus();">&#128269;</button>
+        <form id="searchForm" method="get" action="{{ url_for('earnings_search') }}" class="search-expand-form">
+            <input id="searchInput" type="text" name="q" placeholder="Search earnings...">
+        </form>
+    </div>
+
+    <div class="layout">
+        <div class="sidebar b-left-green">
+            <a href="{{ url_for('earnings_view', view='day') }}" class="active">Day</a>
+            <a href="{{ url_for('earnings_view', view='week') }}">Week</a>
+            <a href="{{ url_for('earnings_view', view='month') }}">Month</a>
+        </div>
+
+        <div class="main-content">
+            <div class="card b-full-green">
+                <div class="calendar-nav">
+                    <a href="{{ url_for('earnings_view', view='day', date=prev_date) }}">&larr; Prev</a>
+                    <h2 style="text-align: center;">{{ date_display }}</h2>
+                    <a href="{{ url_for('earnings_view', view='day', date=next_date) }}">Next &rarr;</a>
+                </div>
+
+                {% if rows %}
+                    <div class="entries-grid">
+                    {% for row in rows %}
+                        <div class="entry-row">
+                            <span class="bubble bubble-category" style="background-color: {{ category_colors.get(row[2], '#ccc') }};">{{ row[2] }}</span>
+                            <span class="entry-note">{{ row[5] }}</span>
+                            <span class="bubble bubble-method" style="background-color: {{ method_colors.get(row[4], '#ccc') }};">{{ row[4] }}</span>
+                            <span class="entry-amount earning">+{{ currency_symbol }}{{ "%.2f"|format(row[3]) }}</span>
+                            <a href="{{ url_for('earnings_edit', earning_id=row[0]) }}" class="entry-edit-btn">Edit</a>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No earnings today.</p>
+                {% endif %}
+
+                <hr>
+                <p><strong>Total: <span style="color: var(--sage-dark);">{{ currency_symbol }}{{ "%.2f"|format(total) }}</span></strong></p>
+            </div>
+
+            {% if rows %}
+            <div class="card b-none">
+                <div class="chart-row">
+                    <div class="chart-box">
+                        <h4>By category</h4>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h4>By method</h4>
+                        <canvas id="methodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('earnings_add', date=date_str) }}" class="add-button">+ Add Earning</a>
+</div>
+
+{% if rows %}
+<script>
+    function colorsFor(labels, colorMap) { return labels.map(l => colorMap[l] || '#ccc'); }
+    const categoryColors = {{ category_colors | tojson }};
+    const methodColors = {{ method_colors | tojson }};
+
+    const catLabels = {{ by_category | map(attribute=0) | list | tojson }};
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: { labels: catLabels, datasets: [{ data: {{ by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(catLabels, categoryColors) }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+
+    const methLabels = {{ by_method | map(attribute=0) | list | tojson }};
+    new Chart(document.getElementById('methodChart'), {
+        type: 'pie',
+        data: { labels: methLabels, datasets: [{ data: {{ by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(methLabels, methodColors) }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+</script>
+{% endif %}
+{% endblock %}

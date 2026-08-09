@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ method_name }} - Account{% endblock %}
+{% block content %}
+<div class="theme-account">
+
+    <a href="{{ url_for('accounts_view') }}" class="back-link">&larr; Back to Accounts</a>
+
+    <div class="card b-full-green">
+        <h2><span class="bubble bubble-method" style="background-color: {{ color }};">{{ method_name }}</span></h2>
+        <div class="big-number" style="font-size: 2.2rem;">{{ currency_symbol }}{{ "%.2f"|format(current_balance) }}</div>
+        <div class="small-label">current balance</div>
+        <a href="{{ url_for('accounts_set', method_name=method_name) }}" style="color: var(--sage-dark); font-size: 0.85rem; text-decoration: none;">Edit starting balance</a>
+    </div>
+
+    <div class="card b-top-green">
+        <h3>Transaction history</h3>
+        {% if days %}
+            {% for d in days %}
+                <div class="day-header">{{ d.date_display }}</div>
+                <div class="entries-grid">
+                {% for a in d.activity %}
+                    <div class="entry-row">
+                        <span class="bubble bubble-category" style="background-color: {{ category_colors.get(a.category, '#ccc') }};">{{ a.category }}</span>
+                        <span class="entry-note">{{ a.note }}</span>
+                        <span class="bubble bubble-method" style="background-color: {{ method_colors.get(a.method, '#ccc') }};">{{ a.method }}</span>
+                        <span class="entry-amount {{ 'earning' if a.amount > 0 else 'expense' }}">
+                            {{ '+' if a.amount > 0 else '' }}{{ currency_symbol }}{{ "%.2f"|format(a.amount) }}
+                        </span>
+                        <span></span>
+                    </div>
+                {% endfor %}
+                </div>
+                <p style="text-align: right; color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                    Balance after this day: <strong style="color: var(--text);">{{ currency_symbol }}{{ "%.2f"|format(d.balance_after) }}</strong>
+                </p>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No activity yet.</p>
+        {% endif %}
+
+        <div class="pagination-nav">
+            {% if has_prev %}
+                <a href="{{ url_for('account_detail', method_name=method_name, page=page-1) }}">&larr; More recent</a>
+            {% else %}
+                <span>&larr; More recent</span>
+            {% endif %}
+            {% if has_next %}
+                <a href="{{ url_for('account_detail', method_name=method_name, page=page+1) }}">Older &rarr;</a>
+            {% else %}
+                <span>Older &rarr;</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

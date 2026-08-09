@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Edit Label{% endblock %}
+{% block content %}
+
+    <div class="card" style="max-width: 400px; margin: 0 auto;">
+        <h2>Edit {{ label[1] }}</h2>
+        <form method="post" action="{{ url_for('labels_edit', label_id=label[0]) }}">
+            <input type="hidden" name="type" value="{{ label[1] }}">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" value="{{ label[2] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Color</label>
+                <div class="color-picker">
+                    {% for c in colors %}
+                        <label class="color-swatch" style="background-color: {{ c }};">
+                            <input type="radio" name="color" value="{{ c }}" {{ "checked" if c == label[3] else "" }}>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <a href="{{ url_for('accounts_view') if label[1] == 'method' else url_for('settings_view') }}" class="btn-cancel">Cancel</a>
+                    <button type="submit" formaction="{{ url_for('labels_delete', label_id=label[0]) }}" formmethod="post" class="btn btn-danger" onclick="return confirm('Delete this {{ label[1] }}? This won\'t remove past entries that used it.');">Delete</button>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

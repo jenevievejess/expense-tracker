@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Add Account{% endblock %}
+{% block content %}
+
+    <div class="card" style="max-width: 480px; margin: 0 auto;">
+        <h2>Add Account</h2>
+
+        <form method="post" action="{{ url_for('accounts_add') }}">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" placeholder="e.g. BPI Savings, GCash, Cash" required>
+            </div>
+
+            <div class="form-group">
+                <label>Color</label>
+                <div class="color-picker">
+                    {% for c in method_colors %}
+                        <label class="color-swatch" style="background-color: {{ c }};">
+                            <input type="radio" name="color" value="{{ c }}" {{ "checked" if loop.first else "" }}>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="starting_balance">Starting balance (optional)</label>
+                <input type="number" step="0.01" name="starting_balance" id="starting_balance" placeholder="Leave blank to set later">
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Balance as of</label>
+                <input type="date" name="start_date" id="start_date" value="{{ default_date }}">
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('accounts_view') }}" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Account</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

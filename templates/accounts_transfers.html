@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}All Transfers{% endblock %}
+{% block content %}
+<div class="theme-account">
+
+    <a href="{{ url_for('accounts_view') }}" class="back-link">&larr; Back to Accounts</a>
+
+    <div class="card b-top-pink">
+        <h2>All transfers</h2>
+        {% if transfers %}
+            {% for t in transfers %}
+                <div class="transfer-row">
+                    <span class="transfer-date">{{ t.date_display }}</span>
+                    <span class="bubble bubble-method" style="background-color: {{ method_colors.get(t.from_method, '#ccc') }};">{{ t.from_method }}</span>
+                    <span class="transfer-arrow">&rarr;</span>
+                    <span class="bubble bubble-method" style="background-color: {{ method_colors.get(t.to_method, '#ccc') }};">{{ t.to_method }}</span>
+                    <span class="transfer-note">{{ t.note }}</span>
+                    <span class="transfer-amount">{{ currency_symbol }}{{ "%.2f"|format(t.amount) }}</span>
+                    <a href="{{ url_for('transfer_edit', transfer_id=t.id) }}" class="entry-edit-btn">Edit</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No transfers yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

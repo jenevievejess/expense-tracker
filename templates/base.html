@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Expense Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Expense Tracker</div>
+        <div class="navbar-right">
+            <div class="tabs">
+                <a href="{{ url_for('home') }}" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
+                <a href="{{ url_for('expenses_view') }}" class="{{ 'active' if request.path.startswith('/expenses') else '' }}">Expenses</a>
+                <a href="{{ url_for('earnings_view') }}" class="{{ 'active' if request.path.startswith('/earnings') else '' }}">Earnings</a>
+                <a href="{{ url_for('budget_view') }}" class="{{ 'active' if request.path.startswith('/budget') else '' }}">Budget</a>
+                <a href="{{ url_for('accounts_view') }}" class="{{ 'active' if request.path.startswith('/accounts') else '' }}">Accounts</a>
+            </div>
+            <a href="{{ url_for('settings_view') }}" class="settings-link {{ 'active' if request.path.startswith('/settings') or request.path.startswith('/labels') or request.path.startswith('/recurring') else '' }}">Settings</a>
+        </div>
+    </nav>
+
+    <div class="page">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

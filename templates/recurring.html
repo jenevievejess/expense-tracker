@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Recurring Transactions{% endblock %}
+{% block content %}
+
+    <a href="{{ url_for('settings_view') }}" class="back-link">&larr; Back to Settings</a>
+
+    <div class="card b-full-pink">
+        <h2>Recurring transactions</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">These automatically create a real entry each month on the day you set.</p>
+        <p class="entry-hint">Right-click one to edit or delete it</p>
+
+        {% if items %}
+            {% for item in items %}
+                <div class="entry-row" oncontextmenu="event.preventDefault(); window.location='{{ url_for('recurring_edit', recurring_id=item.id) }}';">
+                    <div class="entry-left">
+                        <span>{{ item.category }} — {{ item.method }}{% if item.note %} ({{ item.note }}){% endif %}</span>
+                    </div>
+                    <div class="entry-right">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">day {{ item.day_of_month }} of each month</span>
+                        <span class="entry-amount {{ 'expense' if item.type == 'expense' else 'earning' }}">
+                            {{ '-' if item.type == 'expense' else '+' }}{{ currency_symbol }}{{ "%.2f"|format(item.amount) }}
+                        </span>
+                        <form method="post" action="{{ url_for('recurring_toggle', recurring_id=item.id) }}" style="display: inline;">
+                            <button type="submit" class="btn" style="padding: 4px 12px; font-size: 0.8rem; background-color: {{ 'var(--sage-light)' if item.active else 'var(--pink-light)' }}; color: {{ 'var(--sage-dark)' if item.active else 'var(--pink-dark)' }};">
+                                {{ "Active" if item.active else "Paused" }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No recurring transactions yet.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('recurring_add') }}" class="add-button">+ Add Recurring</a>
+
+{% endblock %}

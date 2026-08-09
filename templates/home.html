@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Home - Expense Tracker{% endblock %}
+{% block content %}
+<div class="theme-home">
+
+    <div class="card b-full-green" style="text-align: center;">
+        <div class="big-number">{{ currency_symbol }}{{ "%.2f"|format(total_balance) }}</div>
+        <div class="small-label" style="margin-bottom: 0;">total across all your accounts</div>
+    </div>
+
+    <div class="card b-none">
+        <h3>Current budget period</h3>
+        {% if current_period %}
+            <p>{{ current_period.label or (current_period.start_date ~ ' to ' ~ current_period.end_date) }}</p>
+            <div class="big-number" style="font-size: 2rem;">{{ currency_symbol }}{{ "%.2f"|format(current_period_remaining) }}</div>
+            <div class="small-label">remaining of {{ currency_symbol }}{{ "%.2f"|format(current_period.amount) }} budgeted</div>
+        {% else %}
+            <p style="color: var(--text-muted);">No budget period covers today. <a href="{{ url_for('budget_edit') }}" style="color: var(--sage-dark);">Set one up</a>.</p>
+        {% endif %}
+    </div>
+
+    <div class="breakdown-grid">
+        <div class="card breakdown-box expense-box">
+            <h3>All time expenses breakdown</h3>
+            <div class="breakdown-total expense">{{ currency_symbol }}{{ "%.2f"|format(total_expenses) }}</div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h4>By category</h4>
+                    <canvas id="expenseCategoryChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h4>By method</h4>
+                    <canvas id="expenseMethodChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card breakdown-box earning-box">
+            <h3>All time earnings breakdown</h3>
+            <div class="breakdown-total earning">{{ currency_symbol }}{{ "%.2f"|format(total_earnings) }}</div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h4>By category</h4>
+                    <canvas id="earningCategoryChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h4>By method</h4>
+                    <canvas id="earningMethodChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card b-none">
+        <h3>Last 6 months</h3>
+        <canvas id="trendsChart"></canvas>
+    </div>
+</div>
+
+    <script>
+        function colorsFor(labels, colorMap) { return labels.map(l => colorMap[l] || '#ccc'); }
+        const categoryColors = {{ category_colors | tojson }};
+        const methodColors = {{ method_colors | tojson }};
+
+        const trendsData = {{ monthly_trends | tojson }};
+        new Chart(document.getElementById('trendsChart'), {
+            type: 'bar',
+            data: {
+                labels: trendsData.map(d => d.month),
+                datasets: [
+                    { label: 'Expenses', data: trendsData.map(d => d.expenses), backgroundColor: '#C97F8C' },
+                    { label: 'Earnings', data: trendsData.map(d => d.earnings), backgroundColor: '#5F7D64' },
+                    { label: 'Budget', data: trendsData.map(d => d.budget), backgroundColor: '#E8B4BC' },
+                ]
+            },
+            options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+        });
+
+        const expCatLabels = {{ expense_by_category | map(attribute=0) | list | tojson }};
+        new Chart(document.getElementById('expenseCategoryChart'), {
+            type: 'pie',
+            data: { labels: expCatLabels, datasets: [{ data: {{ expense_by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(expCatLabels, categoryColors) }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        });
+
+        const expMethLabels = {{ expense_by_method | map(attribute=0) | list | tojson }};
+        new Chart(document.getElementById('expenseMethodChart'), {
+            type: 'pie',
+            data: { labels: expMethLabels, datasets: [{ data: {{ expense_by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(expMethLabels, methodColors) }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        });
+
+        const earnCatLabels = {{ earning_by_category | map(attribute=0) | list | tojson }};
+        new Chart(document.getElementById('earningCategoryChart'), {
+            type: 'pie',
+            data: { labels: earnCatLabels, datasets: [{ data: {{ earning_by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(earnCatLabels, categoryColors) }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        });
+
+        const earnMethLabels = {{ earning_by_method | map(attribute=0) | list | tojson }};
+        new Chart(document.getElementById('earningMethodChart'), {
+            type: 'pie',
+            data: { labels: earnMethLabels, datasets: [{ data: {{ earning_by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(earnMethLabels, methodColors) }] },
+            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        });
+    </script>
+
+{% endblock %}
