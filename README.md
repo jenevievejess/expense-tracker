@@ -19,6 +19,7 @@ Track expenses, earnings, budgets, and account balances.
 - View summaries through charts and trends
 - Create and manage budget periods with category and method allocations
 - Manage multiple accounts and transfer funds between accounts
+- View transaction history of each account
 - Configurable currency in settings
 
 
@@ -76,7 +77,7 @@ expense-tracker/
 
 
 ## Screenshots
-
-| Home | Expenses | Budget |
-| ---- | -------- | ------ |
-| _add screenshot_ | _add screenshot_ | _add screenshot_ |
+ 
+| Home | Expenses | Budget | Accounts |
+| ---- | -------- | ------ | -------- |
+| ![](screenshots/home.png)| ![](screenshots/expenses.png) | ![](screenshots/budget.png) | ![](screenshots/accounts.png) |
