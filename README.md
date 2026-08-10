@@ -81,3 +81,10 @@ expense-tracker/
 | Home | Expenses | Budget | Accounts |
 | ---- | -------- | ------ | -------- |
 | ![](screenshots/home.png)| ![](screenshots/expenses.png) | ![](screenshots/budget.png) | ![](screenshots/accounts.png) |
+
+
+## Future Improvements
+
+- Add user authentication and separate data for each user, allowing the application to support multiple users
+- Migrate from SQLite to PostgreSQL for a production multi-user deployment
+- Add JavaScript for interactions such as inline editing and instant search without requiring full page reloads
