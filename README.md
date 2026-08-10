@@ -85,6 +85,6 @@ expense-tracker/
 
 ## Future Improvements
 
-- Add user authentication and separate data for each user, allowing the application to support multiple users
-- Migrate from SQLite to PostgreSQL for a production multi-user deployment
-- Add JavaScript for interactions such as inline editing and instant search without requiring full page reloads
+- A login system with user authentication and separate data for each user, allowing the application to support multiple users
+- Migrate from SQLite to PostgreSQL if this ever needed to run somewhere without persistent local storage
+- Add JavaScript for interactions such as inline editing and instant search without requiring full page reloads — kept server-rendered for now since the added complexity wasn't worth it for a CRUD app this size
