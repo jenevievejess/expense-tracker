@@ -16,6 +16,7 @@
                 <a href="{{ url_for('earnings_view') }}" class="{{ 'active' if request.path.startswith('/earnings') else '' }}">Earnings</a>
                 <a href="{{ url_for('budget_view') }}" class="{{ 'active' if request.path.startswith('/budget') else '' }}">Budget</a>
                 <a href="{{ url_for('accounts_view') }}" class="{{ 'active' if request.path.startswith('/accounts') else '' }}">Accounts</a>
+                <a href="{{ url_for('events_view') }}" class="{{ 'active' if request.path.startswith('/events') else '' }}">Events</a>
             </div>
             <a href="{{ url_for('settings_view') }}" class="settings-link {{ 'active' if request.path.startswith('/settings') or request.path.startswith('/labels') or request.path.startswith('/recurring') else '' }}">Settings</a>
         </div>

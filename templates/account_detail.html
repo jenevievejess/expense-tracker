@@ -15,9 +15,9 @@
     <div class="card b-top-green">
         <h3>Transaction history</h3>
         {% if days %}
+            <div class="entries-grid">
             {% for d in days %}
                 <div class="day-header">{{ d.date_display }}</div>
-                <div class="entries-grid">
                 {% for a in d.activity %}
                     <div class="entry-row">
                         <span class="bubble bubble-category" style="background-color: {{ category_colors.get(a.category, '#ccc') }};">{{ a.category }}</span>
@@ -26,14 +26,20 @@
                         <span class="entry-amount {{ 'earning' if a.amount > 0 else 'expense' }}">
                             {{ '+' if a.amount > 0 else '' }}{{ currency_symbol }}{{ "%.2f"|format(a.amount) }}
                         </span>
-                        <span></span>
+                        {% if a.type == 'expense' %}
+                            <a href="{{ url_for('expenses_edit', expense_id=a.id) }}" class="entry-edit-btn">Edit</a>
+                        {% elif a.type == 'earning' %}
+                            <a href="{{ url_for('earnings_edit', earning_id=a.id) }}" class="entry-edit-btn">Edit</a>
+                        {% else %}
+                            <a href="{{ url_for('transfer_edit', transfer_id=a.id) }}" class="entry-edit-btn">Edit</a>
+                        {% endif %}
                     </div>
                 {% endfor %}
-                </div>
-                <p style="text-align: right; color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                <div class="day-balance-line">
                     Balance after this day: <strong style="color: var(--text);">{{ currency_symbol }}{{ "%.2f"|format(d.balance_after) }}</strong>
-                </p>
+                </div>
             {% endfor %}
+            </div>
         {% else %}
             <p style="color: var(--text-muted);">No activity yet.</p>
         {% endif %}

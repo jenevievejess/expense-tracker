@@ -26,12 +26,23 @@
                     <a href="{{ url_for('earnings_view', view='day', date=next_date) }}">Next &rarr;</a>
                 </div>
 
+                {% if band_event %}
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <a href="{{ url_for('event_detail', event_id=band_event.id) }}" class="event-tag" style="background-color: {{ band_event.color }};">{{ band_event.name }}</a>
+                    </div>
+                {% endif %}
+
                 {% if rows %}
                     <div class="entries-grid">
                     {% for row in rows %}
                         <div class="entry-row">
                             <span class="bubble bubble-category" style="background-color: {{ category_colors.get(row[2], '#ccc') }};">{{ row[2] }}</span>
-                            <span class="entry-note">{{ row[5] }}</span>
+                            <span class="entry-note">
+                                {{ row[5] }}
+                                {% if row[6] and event_lookup.get(row[6]) %}
+                                    <a href="{{ url_for('event_detail', event_id=row[6]) }}" class="event-tag-sm" style="background-color: {{ event_lookup[row[6]].color }};">{{ event_lookup[row[6]].name }}</a>
+                                {% endif %}
+                            </span>
                             <span class="bubble bubble-method" style="background-color: {{ method_colors.get(row[4], '#ccc') }};">{{ row[4] }}</span>
                             <span class="entry-amount earning">+{{ currency_symbol }}{{ "%.2f"|format(row[3]) }}</span>
                             <a href="{{ url_for('earnings_edit', earning_id=row[0]) }}" class="entry-edit-btn">Edit</a>
@@ -44,6 +55,16 @@
 
                 <hr>
                 <p><strong>Total: <span style="color: var(--sage-dark);">{{ currency_symbol }}{{ "%.2f"|format(total) }}</span></strong></p>
+                {% if day_tag_totals %}
+                    <div style="margin-top: 4px;">
+                        {% for et in day_tag_totals %}
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span class="event-tag-sm" style="background-color: {{ et.color }};">{{ et.name }}</span>
+                                {{ currency_symbol }}{{ "%.2f"|format(et.total) }} earned today
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             {% if rows %}
@@ -76,14 +97,14 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'pie',
         data: { labels: catLabels, datasets: [{ data: {{ by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(catLabels, categoryColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
     const methLabels = {{ by_method | map(attribute=0) | list | tojson }};
     new Chart(document.getElementById('methodChart'), {
         type: 'pie',
         data: { labels: methLabels, datasets: [{ data: {{ by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(methLabels, methodColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 </script>
 {% endif %}

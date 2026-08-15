@@ -41,10 +41,23 @@
                                 <div class="calendar-cell empty"></div>
                             {% else %}
                                 {% set day_str = "%04d-%02d-%02d"|format(year, month, day) %}
-                                <a href="{{ url_for('expenses_view', view='day', date=day_str) }}" class="calendar-cell">
+                                {% set band = band_map.get(day_str) %}
+                                {% set tag = tag_map.get(day_str) %}
+                                <a href="{{ url_for('expenses_view', view='day', date=day_str) }}" class="calendar-cell"
+                                   oncontextmenu="event.preventDefault(); window.location.href='{{ url_for('events_add') }}?start_date={{ day_str }}';">
                                     <div class="calendar-day-num">{{ day }}</div>
                                     {% if totals_by_day.get(day_str) %}
-                                        <div class="calendar-day-total">-{{ currency_symbol }}{{ "%.0f"|format(totals_by_day[day_str]) }}</div>
+                                        <div class="calendar-day-total">-{{ currency_symbol }}{{ "%.2f"|format(totals_by_day[day_str]) }}</div>
+                                    {% endif %}
+                                    {% if band %}
+                                        <div class="calendar-band {{ 'band-start' if band.start_date == day_str else '' }} {{ 'band-end' if band.end_date == day_str else '' }}"
+                                             style="background-color: {{ band.color }};"
+                                             title="{{ band.name }}: {{ currency_symbol }}{{ '%.2f'|format(band_totals.get(band.id, 0)) }} total">
+                                        </div>
+                                    {% endif %}
+                                    {% if tag %}
+                                        <span class="event-dot" style="background-color: {{ tag.color }};"
+                                              title="{{ tag.name }}: {{ currency_symbol }}{{ '%.2f'|format(daily_tag_totals.get(day_str, {}).get(tag.id, 0)) }} on this day"></span>
                                     {% endif %}
                                 </a>
                             {% endif %}
@@ -54,6 +67,16 @@
 
                 <hr>
                 <p><strong>Month total: <span style="color: var(--pink-dark);">{{ currency_symbol }}{{ "%.2f"|format(total) }}</span></strong></p>
+                {% if month_tag_totals %}
+                    <div style="margin-top: 8px;">
+                        {% for et in month_tag_totals %}
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span class="event-tag-sm" style="background-color: {{ et.color }};">{{ et.name }}</span>
+                                {{ currency_symbol }}{{ "%.2f"|format(et.total) }} tagged this month
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="card b-none">
@@ -83,14 +106,14 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'pie',
         data: { labels: catLabels, datasets: [{ data: {{ by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(catLabels, categoryColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
     const methLabels = {{ by_method | map(attribute=0) | list | tojson }};
     new Chart(document.getElementById('methodChart'), {
         type: 'pie',
         data: { labels: methLabels, datasets: [{ data: {{ by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(methLabels, methodColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 </script>
 {% endblock %}

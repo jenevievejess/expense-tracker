@@ -27,8 +27,16 @@
                 </div>
 
                 {% for d in day_labels %}
+                    {% set band = band_map.get(d.date) %}
+                    {% set tag = tag_map.get(d.date) %}
+                    {% set week_event = band or tag %}
                     <a href="{{ url_for('earnings_view', view='day', date=d.date) }}" class="entry-row" style="text-decoration: none; color: var(--text);">
                         <span class="entry-note" style="flex-grow: 1;">{{ d.display }}</span>
+                        {% if week_event %}
+                            {% set day_earned = daily_tag_totals.get(d.date, {}).get(week_event.id, 0) %}
+                            <span class="event-tag-sm" style="background-color: {{ week_event.color }};"
+                                  title="{{ week_event.name }}{% if day_earned %}: {{ currency_symbol }}{{ '%.2f'|format(day_earned) }} earned{% endif %}">{{ week_event.name }}</span>
+                        {% endif %}
                         <span class="entry-amount earning">
                             {% if totals_by_day.get(d.date) %}+{{ currency_symbol }}{{ "%.2f"|format(totals_by_day[d.date]) }}{% else %}—{% endif %}
                         </span>
@@ -37,6 +45,16 @@
 
                 <hr>
                 <p><strong>Week total: <span style="color: var(--sage-dark);">{{ currency_symbol }}{{ "%.2f"|format(total) }}</span></strong></p>
+                {% if week_tag_totals %}
+                    <div style="margin-top: 4px;">
+                        {% for et in week_tag_totals %}
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span class="event-tag-sm" style="background-color: {{ et.color }};">{{ et.name }}</span>
+                                {{ currency_symbol }}{{ "%.2f"|format(et.total) }} earned this week
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="card b-none">
@@ -66,14 +84,14 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'pie',
         data: { labels: catLabels, datasets: [{ data: {{ by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(catLabels, categoryColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
     const methLabels = {{ by_method | map(attribute=0) | list | tojson }};
     new Chart(document.getElementById('methodChart'), {
         type: 'pie',
         data: { labels: methLabels, datasets: [{ data: {{ by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(methLabels, methodColors) }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 </script>
 {% endblock %}

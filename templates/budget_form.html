@@ -36,7 +36,7 @@
             <h3>Budget by category (optional)</h3>
             <div id="category-allocations">
                 {% for alloc in category_allocs %}
-                    <div class="allocation-row">
+                    <div class="allocation-row" data-alloc-id="{{ alloc.id }}">
                         <div class="form-group">
                             <select name="alloc_category_name">
                                 {% for id, name, color in categories %}
@@ -47,28 +47,16 @@
                         <div class="form-group">
                             <input type="number" step="0.01" name="alloc_category_amount" value="{{ alloc.amount }}" placeholder="Amount">
                         </div>
+                        <button type="button" class="row-delete-btn" onclick="deleteAllocationRow(this, {{ alloc.id }})" title="Delete">&times;</button>
                     </div>
                 {% endfor %}
-                <div class="allocation-row">
-                    <div class="form-group">
-                        <select name="alloc_category_name">
-                            <option value="">-- choose category --</option>
-                            {% for id, name, color in categories %}
-                                <option value="{{ name }}">{{ name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="number" step="0.01" name="alloc_category_amount" placeholder="Amount">
-                    </div>
-                </div>
             </div>
-            <a href="#" onclick="addRow('category-allocations', 'alloc_category_name', 'alloc_category_amount', {{ categories|map(attribute=1)|list|tojson }}); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another category</a>
+            <a href="#" onclick="addCategoryRow(); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another category</a>
 
             <h3 style="margin-top: 24px;">Budget by method (optional)</h3>
             <div id="method-allocations">
                 {% for alloc in method_allocs %}
-                    <div class="allocation-row">
+                    <div class="allocation-row" data-alloc-id="{{ alloc.id }}">
                         <div class="form-group">
                             <select name="alloc_method_name">
                                 {% for id, name, color in methods %}
@@ -79,23 +67,11 @@
                         <div class="form-group">
                             <input type="number" step="0.01" name="alloc_method_amount" value="{{ alloc.amount }}" placeholder="Amount">
                         </div>
+                        <button type="button" class="row-delete-btn" onclick="deleteAllocationRow(this, {{ alloc.id }})" title="Delete">&times;</button>
                     </div>
                 {% endfor %}
-                <div class="allocation-row">
-                    <div class="form-group">
-                        <select name="alloc_method_name">
-                            <option value="">-- choose method --</option>
-                            {% for id, name, color in methods %}
-                                <option value="{{ name }}">{{ name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="number" step="0.01" name="alloc_method_amount" placeholder="Amount">
-                    </div>
-                </div>
             </div>
-            <a href="#" onclick="addRow('method-allocations', 'alloc_method_name', 'alloc_method_amount', {{ methods|map(attribute=1)|list|tojson }}); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another method</a>
+            <a href="#" onclick="addMethodRow(); return false;" style="color: var(--sage-dark); font-size: 0.9rem;">+ Add another method</a>
 
             <div class="form-actions">
                 <div class="form-actions-left">
@@ -110,6 +86,9 @@
     </div>
 
     <script>
+        const categoryOptions = {{ categories | map(attribute=1) | list | tojson }};
+        const methodOptions = {{ methods | map(attribute=1) | list | tojson }};
+
         function addRow(containerId, selectName, inputName, options) {
             const container = document.getElementById(containerId);
             const row = document.createElement('div');
@@ -121,8 +100,24 @@
             row.innerHTML = `
                 <div class="form-group"><select name="${selectName}">${optionsHtml}</select></div>
                 <div class="form-group"><input type="number" step="0.01" name="${inputName}" placeholder="Amount"></div>
+                <button type="button" class="row-delete-btn" title="Remove">&times;</button>
             `;
+            row.querySelector('.row-delete-btn').addEventListener('click', () => row.remove());
             container.appendChild(row);
+        }
+
+        function addCategoryRow() {
+            addRow('category-allocations', 'alloc_category_name', 'alloc_category_amount', categoryOptions);
+        }
+
+        function addMethodRow() {
+            addRow('method-allocations', 'alloc_method_name', 'alloc_method_amount', methodOptions);
+        }
+
+        function deleteAllocationRow(button, allocationId) {
+            if (!confirm('Delete this budget row?')) return;
+            fetch(`/budget/allocation/delete/${allocationId}`, { method: 'POST' })
+                .then(() => button.closest('.allocation-row').remove());
         }
     </script>
 

@@ -17,6 +17,7 @@ from settings import create_settings_table
 from accounts import create_accounts_table, set_account_balance
 from transfers import create_transfers_table, add_transfer
 from recurring import create_recurring_table, add_recurring, generate_due
+from events import create_events_table, add_event
 
 DB_NAME = "tracker.db"
 
@@ -32,6 +33,7 @@ create_settings_table()
 create_accounts_table()
 create_transfers_table()
 create_recurring_table()
+create_events_table()
 
 # ---------- Categories and methods ----------
 add_category("food", CATEGORY_COLORS[0])
@@ -74,6 +76,18 @@ add_expense("2026-08-06", "food", 9.80, "cash", "coffee")
 add_expense("2026-08-06", "entertainment", 25.00, "e-wallet", "movie ticket")
 add_expense("2026-08-06", "transport", 4.00, "e-wallet", "bus")
 
+add_expense("2026-08-07", "food", 7.20, "cash", "coffee")
+add_expense("2026-08-07", "transport", 3.50, "e-wallet", "bus to work")
+
+add_expense("2026-08-09", "food", 52.00, "card", "weekly groceries")
+add_expense("2026-08-09", "entertainment", 18.00, "cash", "bowling with friends")
+
+add_earning("2026-08-11", "freelance", 130.00, "e-wallet", "logo revisions")
+add_expense("2026-08-11", "food", 9.00, "cash", "lunch")
+
+add_expense("2026-08-14", "food", 27.50, "card", "dinner")
+add_expense("2026-08-14", "transport", 6.00, "e-wallet", "grab ride")
+
 add_expense("2026-08-03", "food", 12.50, "cash", "lunch")
 add_expense("2026-08-02", "transport", 4.00, "e-wallet", "bus")
 add_earning("2026-08-02", "freelance", 150.00, "e-wallet", "small design project")
@@ -82,6 +96,28 @@ add_expense("2026-07-10", "transport", 4.00, "e-wallet", "bus")
 add_expense("2026-07-12", "food", 40.20, "card", "groceries")
 add_expense("2026-07-18", "entertainment", 30.00, "cash", "concert ticket")
 add_earning("2026-07-20", "freelance", 220.00, "bank", "logo design")
+
+# ---------- Events ----------
+beach_trip_id = add_event("Beach Trip", "#B8D4C4", "2026-07-14", "2026-07-16")
+
+add_expense("2026-07-05", "transport", 220.00, "card", "flight tickets", 0, beach_trip_id)
+add_expense("2026-07-08", "transport", 95.00, "bank", "hotel deposit", 0, beach_trip_id)
+
+add_expense("2026-07-14", "food", 18.00, "cash", "beach snacks")
+add_expense("2026-07-14", "transport", 25.00, "card", "taxi to hotel")
+add_expense("2026-07-15", "food", 32.00, "card", "seafood dinner")
+add_expense("2026-07-15", "entertainment", 20.00, "cash", "snorkeling gear rental")
+add_expense("2026-07-16", "food", 15.00, "cash", "breakfast before heading home")
+
+festival_id = add_event("City Music Festival", "#D4A5C4", "2026-08-12", "2026-08-13", budget=250.00)
+
+add_expense("2026-08-10", "entertainment", 90.00, "card", "festival tickets", 0, festival_id)
+
+add_expense("2026-08-12", "transport", 12.00, "e-wallet", "grab to venue")
+add_expense("2026-08-12", "food", 22.00, "cash", "festival food stalls")
+add_expense("2026-08-12", "entertainment", 15.00, "cash", "merch")
+add_expense("2026-08-13", "food", 18.50, "card", "brunch before heading home")
+add_expense("2026-08-13", "transport", 14.00, "e-wallet", "grab home")
 
 # ---------- Transfers between accounts ----------
 add_transfer("2026-06-15", "bank", "cash", 100.00, "ATM withdrawal")
@@ -127,6 +163,7 @@ set_allocation(aug_id, "method", "card", 900)
 set_allocation(aug_id, "method", "e-wallet", 200)
 
 print("Dummy data seeded successfully - covers colored labels, recurring,")
-print("accounts/balances, transfers, a reimbursed expense, and 4 months of")
-print("self-contained budget periods. Busy days (Aug 4-6) show realistic volume.")
+print("accounts/balances, transfers, a reimbursed expense, two band-tagged")
+print("events (Beach Trip + City Music Festival), and 4 months of")
+print("self-contained budget periods. Busy days (Aug 4-14) show realistic volume.")
 print("Run: python3 app.py, then visit http://127.0.0.1:5000")

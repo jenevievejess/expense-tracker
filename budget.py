@@ -1,9 +1,15 @@
 import sqlite3
+import os
 import calendar
 from datetime import date as _date
-from expenses import get_total_expenses, get_total_expenses_net, get_total_by_category, get_total_by_method
+from expenses import (
+    get_total_expenses,
+    get_total_expenses_net_excluding_events as get_total_expenses_net,
+    get_total_by_category_excluding_events as get_total_by_category,
+    get_total_by_method_excluding_events as get_total_by_method,
+)
 
-DB_NAME = "tracker.db"
+DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tracker.db")
 
 
 def get_connection():

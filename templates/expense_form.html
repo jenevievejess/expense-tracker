@@ -47,6 +47,16 @@
                 <input type="text" name="note" id="note" value="{{ entry[5] if entry else '' }}">
             </div>
 
+            <div class="form-group">
+                <label for="event_id">Tag to an event (optional)</label>
+                <select name="event_id" id="event_id">
+                    <option value="">None</option>
+                    {% for e in all_events %}
+                        <option value="{{ e.id }}" {{ "selected" if entry and entry[7] == e.id else "" }}>{{ e.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             {% if not entry %}
                 <div class="form-group">
                     <label>

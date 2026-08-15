@@ -1,6 +1,8 @@
 import sqlite3
+import os
+from events import get_event_for_date
 
-DB_NAME = "tracker.db"
+DB_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tracker.db")
 
 
 def get_connection():
@@ -17,19 +19,27 @@ def create_earnings_table():
             category TEXT NOT NULL,
             amount REAL NOT NULL,
             method TEXT,
-            note TEXT
+            note TEXT,
+            event_id INTEGER
         )
     """)
+    try:
+        cursor.execute("ALTER TABLE earnings ADD COLUMN event_id INTEGER")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
     conn.close()
 
 
-def add_earning(earning_date, category, amount, method, note):
+def add_earning(earning_date, category, amount, method, note, event_id=None):
+    if event_id is None:
+        band_event = get_event_for_date(earning_date)
+        event_id = band_event["id"] if band_event else None
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO earnings (date, category, amount, method, note) VALUES (?, ?, ?, ?, ?)",
-        (earning_date, category, amount, method, note)
+        "INSERT INTO earnings (date, category, amount, method, note, event_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (earning_date, category, amount, method, note, event_id)
     )
     conn.commit()
     conn.close()
@@ -40,7 +50,7 @@ def get_earning(earning_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, date, category, amount, method, note FROM earnings WHERE id=?",
+        "SELECT id, date, category, amount, method, note, event_id FROM earnings WHERE id=?",
         (earning_id,)
     )
     row = cursor.fetchone()
@@ -53,25 +63,25 @@ def view_earnings(start_date=None, end_date=None):
     cursor = conn.cursor()
     if start_date and end_date:
         cursor.execute(
-            "SELECT id, date, category, amount, method, note FROM earnings "
+            "SELECT id, date, category, amount, method, note, event_id FROM earnings "
             "WHERE date BETWEEN ? AND ? ORDER BY date",
             (start_date, end_date)
         )
     else:
         cursor.execute(
-            "SELECT id, date, category, amount, method, note FROM earnings ORDER BY date"
+            "SELECT id, date, category, amount, method, note, event_id FROM earnings ORDER BY date"
         )
     rows = cursor.fetchall()
     conn.close()
     return rows
 
 
-def edit_earning(earning_id, date, category, amount, method, note):
+def edit_earning(earning_id, date, category, amount, method, note, event_id=None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE earnings SET date=?, category=?, amount=?, method=?, note=? WHERE id=?",
-        (date, category, amount, method, note, earning_id)
+        "UPDATE earnings SET date=?, category=?, amount=?, method=?, note=?, event_id=? WHERE id=?",
+        (date, category, amount, method, note, event_id, earning_id)
     )
     conn.commit()
     conn.close()
@@ -130,6 +140,82 @@ def get_total_by_method(start_date=None, end_date=None):
     else:
         cursor.execute(
             "SELECT method, SUM(amount) FROM earnings GROUP BY method ORDER BY method"
+        )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_total_by_category_excluding_events(start_date=None, end_date=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if start_date and end_date:
+        cursor.execute(
+            "SELECT category, SUM(amount) FROM earnings "
+            "WHERE date BETWEEN ? AND ? AND event_id IS NULL GROUP BY category ORDER BY category",
+            (start_date, end_date)
+        )
+    else:
+        cursor.execute(
+            "SELECT category, SUM(amount) FROM earnings "
+            "WHERE event_id IS NULL GROUP BY category ORDER BY category"
+        )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_total_by_category_events_only(start_date=None, end_date=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if start_date and end_date:
+        cursor.execute(
+            "SELECT category, SUM(amount) FROM earnings "
+            "WHERE date BETWEEN ? AND ? AND event_id IS NOT NULL GROUP BY category ORDER BY category",
+            (start_date, end_date)
+        )
+    else:
+        cursor.execute(
+            "SELECT category, SUM(amount) FROM earnings "
+            "WHERE event_id IS NOT NULL GROUP BY category ORDER BY category"
+        )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_total_by_method_excluding_events(start_date=None, end_date=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if start_date and end_date:
+        cursor.execute(
+            "SELECT method, SUM(amount) FROM earnings "
+            "WHERE date BETWEEN ? AND ? AND event_id IS NULL GROUP BY method ORDER BY method",
+            (start_date, end_date)
+        )
+    else:
+        cursor.execute(
+            "SELECT method, SUM(amount) FROM earnings "
+            "WHERE event_id IS NULL GROUP BY method ORDER BY method"
+        )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_total_by_method_events_only(start_date=None, end_date=None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    if start_date and end_date:
+        cursor.execute(
+            "SELECT method, SUM(amount) FROM earnings "
+            "WHERE date BETWEEN ? AND ? AND event_id IS NOT NULL GROUP BY method ORDER BY method",
+            (start_date, end_date)
+        )
+    else:
+        cursor.execute(
+            "SELECT method, SUM(amount) FROM earnings "
+            "WHERE event_id IS NOT NULL GROUP BY method ORDER BY method"
         )
     rows = cursor.fetchall()
     conn.close()

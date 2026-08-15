@@ -23,7 +23,7 @@ from labels import (
 from budget import (
     create_budget_tables, get_all_periods,
     get_period, add_period, edit_period, delete_period,
-    get_allocations, set_allocation, get_allocation_progress,
+    get_allocations, set_allocation, get_allocation_progress, delete_allocation,
     get_remaining_for_period, get_current_period, find_period_by_dates,
 )
 from settings import (
@@ -46,6 +46,14 @@ from recurring import (
 from trends import get_monthly_totals
 from search import search_expenses, search_earnings
 from dateutils import week_range, week_days, month_calendar, month_range
+from events import (
+    create_events_table, add_event, edit_event, delete_event,
+    get_event, get_all_events, get_band_map, get_tag_map,
+    get_transactions_for_event, get_event_totals, get_event_for_date,
+    get_band_total, get_tag_totals_for_range,
+    get_daily_tag_totals, get_band_total_earnings, get_daily_tag_totals_earnings,
+    get_tag_totals_for_range_earnings, EVENT_COLORS,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
@@ -58,6 +66,7 @@ create_settings_table()
 create_accounts_table()
 create_transfers_table()
 create_recurring_table()
+create_events_table()
 
 
 @app.before_request
@@ -146,6 +155,10 @@ def expenses_view():
             by_category=by_category, by_method=by_method,
             prev_month_str=prev_month_str, next_month_str=next_month_str,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_map=get_band_map(start, end), tag_map=get_tag_map(start, end),
+            band_totals={eid: get_band_total(eid) for eid in {e["id"] for e in get_band_map(start, end).values()}},
+            daily_tag_totals=get_daily_tag_totals(start, end),
+            month_tag_totals=get_tag_totals_for_range(start, end),
         )
 
     elif view == "week":
@@ -168,6 +181,9 @@ def expenses_view():
             total=total, by_category=by_category, by_method=by_method, week_label=week_label,
             prev_week_date=prev_week_date, next_week_date=next_week_date,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_map=get_band_map(start, end), tag_map=get_tag_map(start, end),
+            daily_tag_totals=get_daily_tag_totals(start, end),
+            week_tag_totals=get_tag_totals_for_range(start, end),
         )
 
     else:  # day
@@ -183,6 +199,9 @@ def expenses_view():
             rows=rows, total=total, prev_date=prev_date, next_date=next_date,
             by_category=by_category, by_method=by_method,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_event=get_band_map(date_str, date_str).get(date_str),
+            event_lookup={e["id"]: e for e in get_all_events()},
+            day_tag_totals=get_tag_totals_for_range(date_str, date_str),
         )
 
 
@@ -195,20 +214,24 @@ def expenses_add():
         method = request.form["method"]
         note = request.form.get("note", "")
         reimbursed = float(request.form.get("reimbursed") or 0)
+        event_id = request.form.get("event_id") or None
+        if not event_id:
+            band_event = get_event_for_date(entry_date)
+            event_id = band_event["id"] if band_event else None
 
         if request.form.get("is_recurring"):
             day_of_month = int(entry_date.split("-")[2])
             add_recurring("expense", category, amount, method, note, day_of_month, entry_date)
             generate_due()
         else:
-            add_expense(entry_date, category, amount, method, note, reimbursed)
+            add_expense(entry_date, category, amount, method, note, reimbursed, event_id)
 
         return redirect(url_for("expenses_view", view="day", date=entry_date))
 
     default_date = request.args.get("date", str(date.today()))
     return render_template(
         "expense_form.html", entry=None, default_date=default_date,
-        categories=view_categories(), methods=view_methods(),
+        categories=view_categories(), methods=view_methods(), all_events=get_all_events(),
     )
 
 
@@ -216,17 +239,18 @@ def expenses_add():
 def expenses_edit(expense_id):
     if request.method == "POST":
         reimbursed = float(request.form.get("reimbursed") or 0)
+        event_id = request.form.get("event_id") or None
         edit_expense(
             expense_id, request.form["date"], request.form["category"],
             float(request.form["amount"]), request.form["method"],
-            request.form.get("note", ""), reimbursed
+            request.form.get("note", ""), reimbursed, event_id
         )
         return redirect(url_for("expenses_view", view="day", date=request.form["date"]))
 
     entry = get_expense(expense_id)
     return render_template(
         "expense_form.html", entry=entry, default_date=entry[1],
-        categories=view_categories(), methods=view_methods(),
+        categories=view_categories(), methods=view_methods(), all_events=get_all_events(),
     )
 
 
@@ -268,6 +292,10 @@ def earnings_view():
             by_category=by_category, by_method=by_method,
             prev_month_str=prev_month_str, next_month_str=next_month_str,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_map=get_band_map(start, end), tag_map=get_tag_map(start, end),
+            band_totals={eid: get_band_total_earnings(eid) for eid in {e["id"] for e in get_band_map(start, end).values()}},
+            daily_tag_totals=get_daily_tag_totals_earnings(start, end),
+            month_tag_totals=get_tag_totals_for_range_earnings(start, end),
         )
 
     elif view == "week":
@@ -290,6 +318,9 @@ def earnings_view():
             total=total, by_category=by_category, by_method=by_method, week_label=week_label,
             prev_week_date=prev_week_date, next_week_date=next_week_date,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_map=get_band_map(start, end), tag_map=get_tag_map(start, end),
+            daily_tag_totals=get_daily_tag_totals_earnings(start, end),
+            week_tag_totals=get_tag_totals_for_range_earnings(start, end),
         )
 
     else:  # day
@@ -305,6 +336,9 @@ def earnings_view():
             rows=rows, total=total, prev_date=prev_date, next_date=next_date,
             by_category=by_category, by_method=by_method,
             category_colors=get_category_colors(), method_colors=get_method_colors(),
+            band_event=get_band_map(date_str, date_str).get(date_str),
+            event_lookup={e["id"]: e for e in get_all_events()},
+            day_tag_totals=get_tag_totals_for_range_earnings(date_str, date_str),
         )
 
 
@@ -316,13 +350,17 @@ def earnings_add():
         amount = float(request.form["amount"])
         method = request.form["method"]
         note = request.form.get("note", "")
+        event_id = request.form.get("event_id") or None
+        if not event_id:
+            band_event = get_event_for_date(entry_date)
+            event_id = band_event["id"] if band_event else None
 
         if request.form.get("is_recurring"):
             day_of_month = int(entry_date.split("-")[2])
             add_recurring("earning", category, amount, method, note, day_of_month, entry_date)
             generate_due()
         else:
-            add_earning(entry_date, category, amount, method, note)
+            add_earning(entry_date, category, amount, method, note, event_id)
 
         return redirect(url_for("earnings_view", view="day", date=entry_date))
 
@@ -332,24 +370,25 @@ def earnings_add():
     return render_template(
         "earning_form.html", entry=None, default_date=default_date,
         prefill_amount=prefill_amount, prefill_note=prefill_note,
-        categories=view_categories(), methods=view_methods(),
+        categories=view_categories(), methods=view_methods(), all_events=get_all_events(),
     )
 
 
 @app.route("/earnings/edit/<int:earning_id>", methods=["GET", "POST"])
 def earnings_edit(earning_id):
     if request.method == "POST":
+        event_id = request.form.get("event_id") or None
         edit_earning(
             earning_id, request.form["date"], request.form["category"],
             float(request.form["amount"]), request.form["method"],
-            request.form.get("note", "")
+            request.form.get("note", ""), event_id
         )
         return redirect(url_for("earnings_view", view="day", date=request.form["date"]))
 
     entry = get_earning(earning_id)
     return render_template(
         "earning_form.html", entry=entry, default_date=entry[1],
-        categories=view_categories(), methods=view_methods(),
+        categories=view_categories(), methods=view_methods(), all_events=get_all_events(),
     )
 
 
@@ -426,6 +465,12 @@ def budget_edit(period_id=None):
 def budget_delete(period_id):
     delete_period(period_id)
     return redirect(url_for("budget_view"))
+
+
+@app.route("/budget/allocation/delete/<int:allocation_id>", methods=["POST"])
+def budget_allocation_delete(allocation_id):
+    delete_allocation(allocation_id)
+    return ("", 204)
 
 
 # ---------- Accounts ----------
@@ -633,6 +678,81 @@ def recurring_delete(recurring_id):
     return redirect(url_for("recurring_view"))
 
 
+# ---------- Events ----------
+
+@app.route("/events")
+def events_view():
+    all_events = get_all_events()
+    event_id = request.args.get("event_id", type=int)
+    selected_event = get_event(event_id) if event_id else (all_events[0] if all_events else None)
+
+    days = []
+    totals = None
+    if selected_event:
+        transactions = get_transactions_for_event(selected_event["id"])
+        totals = get_event_totals(selected_event["id"])
+        seen_dates = []
+        for t in transactions:
+            if t["date"] not in seen_dates:
+                seen_dates.append(t["date"])
+                days.append({
+                    "date": t["date"],
+                    "date_display": date.fromisoformat(t["date"]).strftime("%A, %-d %B %Y"),
+                    "entries": [], "day_total": 0,
+                })
+            for d in days:
+                if d["date"] == t["date"]:
+                    d["entries"].append(t)
+                    d["day_total"] += t["amount"] if t["kind"] == "expense" else -t["amount"]
+
+    return render_template(
+        "event_list.html", events=all_events, selected_event=selected_event,
+        days=days, totals=totals,
+        category_colors=get_category_colors(), method_colors=get_method_colors(),
+    )
+
+
+@app.route("/events/add", methods=["GET", "POST"])
+def events_add():
+    if request.method == "POST":
+        budget_val = request.form.get("budget")
+        new_id = add_event(
+            request.form["name"], request.form["color"],
+            request.form.get("start_date") or None,
+            request.form.get("end_date") or None,
+            float(budget_val) if budget_val else None,
+        )
+        return redirect(url_for("events_view", event_id=new_id))
+    prefill_date = request.args.get("start_date", "")
+    return render_template("event_add.html", entry=None, event_colors=EVENT_COLORS, prefill_date=prefill_date)
+
+
+@app.route("/events/edit/<int:event_id>", methods=["GET", "POST"])
+def events_edit(event_id):
+    if request.method == "POST":
+        budget_val = request.form.get("budget")
+        edit_event(
+            event_id, request.form["name"], request.form["color"],
+            request.form.get("start_date") or None,
+            request.form.get("end_date") or None,
+            float(budget_val) if budget_val else None,
+        )
+        return redirect(url_for("events_view", event_id=event_id))
+    entry = get_event(event_id)
+    return render_template("event_add.html", entry=entry, event_colors=EVENT_COLORS, prefill_date="")
+
+
+@app.route("/events/delete/<int:event_id>", methods=["POST"])
+def events_delete(event_id):
+    delete_event(event_id)
+    return redirect(url_for("events_view"))
+
+
+@app.route("/events/<int:event_id>")
+def event_detail(event_id):
+    return redirect(url_for("events_view", event_id=event_id))
+
+
 # ---------- Settings ----------
 
 @app.route("/settings")
@@ -700,4 +820,4 @@ def labels_delete(label_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, port=5002)

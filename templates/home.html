@@ -53,7 +53,9 @@
 
     <div class="card b-none">
         <h3>Last 6 months</h3>
-        <canvas id="trendsChart"></canvas>
+        <div style="height: 280px; position: relative;">
+            <canvas id="trendsChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -73,35 +75,35 @@
                     { label: 'Budget', data: trendsData.map(d => d.budget), backgroundColor: '#E8B4BC' },
                 ]
             },
-            options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
 
         const expCatLabels = {{ expense_by_category | map(attribute=0) | list | tojson }};
         new Chart(document.getElementById('expenseCategoryChart'), {
             type: 'pie',
             data: { labels: expCatLabels, datasets: [{ data: {{ expense_by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(expCatLabels, categoryColors) }] },
-            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
 
         const expMethLabels = {{ expense_by_method | map(attribute=0) | list | tojson }};
         new Chart(document.getElementById('expenseMethodChart'), {
             type: 'pie',
             data: { labels: expMethLabels, datasets: [{ data: {{ expense_by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(expMethLabels, methodColors) }] },
-            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
 
         const earnCatLabels = {{ earning_by_category | map(attribute=0) | list | tojson }};
         new Chart(document.getElementById('earningCategoryChart'), {
             type: 'pie',
             data: { labels: earnCatLabels, datasets: [{ data: {{ earning_by_category | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(earnCatLabels, categoryColors) }] },
-            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
 
         const earnMethLabels = {{ earning_by_method | map(attribute=0) | list | tojson }};
         new Chart(document.getElementById('earningMethodChart'), {
             type: 'pie',
             data: { labels: earnMethLabels, datasets: [{ data: {{ earning_by_method | map(attribute=1) | list | tojson }}, backgroundColor: colorsFor(earnMethLabels, methodColors) }] },
-            options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
     </script>
 

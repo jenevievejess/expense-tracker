@@ -123,11 +123,11 @@ def get_account_activity_for_date(method_name, date_str):
 
     cursor.execute("SELECT id, category, amount, note FROM expenses WHERE method=? AND date=?", (method_name, date_str))
     for row in cursor.fetchall():
-        activity.append({"type": "expense", "category": row["category"], "method": method_name, "note": row["note"], "amount": -row["amount"]})
+        activity.append({"id": row["id"], "type": "expense", "category": row["category"], "method": method_name, "note": row["note"], "amount": -row["amount"]})
 
     cursor.execute("SELECT id, category, amount, note FROM earnings WHERE method=? AND date=?", (method_name, date_str))
     for row in cursor.fetchall():
-        activity.append({"type": "earning", "category": row["category"], "method": method_name, "note": row["note"], "amount": row["amount"]})
+        activity.append({"id": row["id"], "type": "earning", "category": row["category"], "method": method_name, "note": row["note"], "amount": row["amount"]})
 
     cursor.execute(
         "SELECT id, from_method, to_method, amount, note FROM transfers WHERE (from_method=? OR to_method=?) AND date=?",
@@ -135,9 +135,9 @@ def get_account_activity_for_date(method_name, date_str):
     )
     for row in cursor.fetchall():
         if row["from_method"] == method_name:
-            activity.append({"type": "transfer", "category": "Transfer", "method": row["to_method"], "note": row["note"], "amount": -row["amount"]})
+            activity.append({"id": row["id"], "type": "transfer", "category": "Transfer", "method": row["to_method"], "note": row["note"], "amount": -row["amount"]})
         else:
-            activity.append({"type": "transfer", "category": "Transfer", "method": row["from_method"], "note": row["note"], "amount": row["amount"]})
+            activity.append({"id": row["id"], "type": "transfer", "category": "Transfer", "method": row["from_method"], "note": row["note"], "amount": row["amount"]})
 
     conn.close()
     return activity
