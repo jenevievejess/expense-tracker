@@ -10,6 +10,9 @@
 
     <div class="card b-left-green">
         <h2>Your accounts</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: -8px; margin-bottom: 16px;">
+            Click an account to view its transaction history.
+        </p>
         {% if account_rows %}
             {% for row in account_rows %}
                 <div class="account-row">
