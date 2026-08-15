@@ -20,6 +20,7 @@ Track expenses, earnings, budgets, and account balances.
 - Create and manage budget periods with category and method allocations
 - Manage multiple accounts and transfer funds between accounts
 - View transaction history of each account
+- Group transactions into events with a date range and optional budget (transactions within the range are tagged automatically)
 - Configurable currency in settings
 
 
@@ -47,7 +48,7 @@ To try it with sample data: run `python3 seed_dummy_data.py`
 
 
 ## Project Structure
- 
+
 ```
 expense-tracker/
 ├── app.py               Flask routes
@@ -58,6 +59,7 @@ expense-tracker/
 ├── accounts.py          Account balances
 ├── transfers.py         Transfers between accounts
 ├── recurring.py         Recurring transactions
+├── events.py            Events & date-range auto-tagging
 ├── trends.py            Monthly totals for charts
 ├── search.py            Search
 ├── settings.py          Currency setting
@@ -72,7 +74,7 @@ expense-tracker/
 │   ├── style.css        All styling
 │   └── pattern.svg      Background graphic
 ├── screenshots/
-└── templates/           26 Jinja2 templates, one per page/form
+└── templates/           27 Jinja2 templates, one per page/form
 ```
 
 
