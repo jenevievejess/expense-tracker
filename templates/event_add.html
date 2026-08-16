@@ -42,6 +42,11 @@
                 <input type="number" step="0.01" min="0" name="budget" id="budget" value="{{ entry.budget if entry and entry.budget else '' }}" placeholder="e.g. 250.00">
             </div>
 
+            <div class="form-group">
+                <label for="notes">Notes (optional)</label>
+                <textarea name="notes" id="notes" rows="3" placeholder="Any details worth remembering about this event">{{ entry.notes if entry and entry.notes else '' }}</textarea>
+            </div>
+
             <div class="form-actions">
                 <div class="form-actions-left">
                     <a href="{{ url_for('events_view') }}" class="btn-cancel">Cancel</a>

@@ -25,11 +25,16 @@ def create_events_table():
             color TEXT NOT NULL,
             start_date TEXT,
             end_date TEXT,
-            budget REAL
+            budget REAL,
+            notes TEXT
         )
     """)
     try:
         cursor.execute("ALTER TABLE events ADD COLUMN budget REAL")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE events ADD COLUMN notes TEXT")
     except sqlite3.OperationalError:
         pass
     conn.commit()
@@ -57,12 +62,12 @@ def apply_band_tagging(event_id):
     conn.close()
 
 
-def add_event(name, color, start_date=None, end_date=None, budget=None):
+def add_event(name, color, start_date=None, end_date=None, budget=None, notes=None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO events (name, color, start_date, end_date, budget) VALUES (?, ?, ?, ?, ?)",
-        (name, color, start_date or None, end_date or None, budget),
+        "INSERT INTO events (name, color, start_date, end_date, budget, notes) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, color, start_date or None, end_date or None, budget, notes or None),
     )
     conn.commit()
     new_id = cursor.lastrowid
@@ -71,12 +76,12 @@ def add_event(name, color, start_date=None, end_date=None, budget=None):
     return new_id
 
 
-def edit_event(event_id, name, color, start_date=None, end_date=None, budget=None):
+def edit_event(event_id, name, color, start_date=None, end_date=None, budget=None, notes=None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE events SET name = ?, color = ?, start_date = ?, end_date = ?, budget = ? WHERE id = ?",
-        (name, color, start_date or None, end_date or None, budget, event_id),
+        "UPDATE events SET name = ?, color = ?, start_date = ?, end_date = ?, budget = ?, notes = ? WHERE id = ?",
+        (name, color, start_date or None, end_date or None, budget, notes or None, event_id),
     )
     conn.commit()
     conn.close()

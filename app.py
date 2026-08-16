@@ -721,6 +721,7 @@ def events_add():
             request.form.get("start_date") or None,
             request.form.get("end_date") or None,
             float(budget_val) if budget_val else None,
+            request.form.get("notes") or None,
         )
         return redirect(url_for("events_view", event_id=new_id))
     prefill_date = request.args.get("start_date", "")
@@ -736,6 +737,7 @@ def events_edit(event_id):
             request.form.get("start_date") or None,
             request.form.get("end_date") or None,
             float(budget_val) if budget_val else None,
+            request.form.get("notes") or None,
         )
         return redirect(url_for("events_view", event_id=event_id))
     entry = get_event(event_id)

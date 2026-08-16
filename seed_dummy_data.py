@@ -98,7 +98,7 @@ add_expense("2026-07-18", "entertainment", 30.00, "cash", "concert ticket")
 add_earning("2026-07-20", "freelance", 220.00, "bank", "logo design")
 
 # ---------- Events ----------
-beach_trip_id = add_event("Beach Trip", "#B8D4C4", "2026-07-14", "2026-07-16")
+beach_trip_id = add_event("Beach Trip", "#B8D4C4", "2026-07-14", "2026-07-16", notes="Long weekend with the roommates - split the airbnb 3 ways, my share already paid upfront.")
 
 add_expense("2026-07-05", "transport", 220.00, "card", "flight tickets", 0, beach_trip_id)
 add_expense("2026-07-08", "transport", 95.00, "bank", "hotel deposit", 0, beach_trip_id)
@@ -109,7 +109,7 @@ add_expense("2026-07-15", "food", 32.00, "card", "seafood dinner")
 add_expense("2026-07-15", "entertainment", 20.00, "cash", "snorkeling gear rental")
 add_expense("2026-07-16", "food", 15.00, "cash", "breakfast before heading home")
 
-festival_id = add_event("City Music Festival", "#D4A5C4", "2026-08-12", "2026-08-13", budget=250.00)
+festival_id = add_event("City Music Festival", "#D4A5C4", "2026-08-12", "2026-08-13", budget=250.00, notes="Bought tickets early for the discount - keep receipts for merch in case of refund.")
 
 add_expense("2026-08-10", "entertainment", 90.00, "card", "festival tickets", 0, festival_id)
 

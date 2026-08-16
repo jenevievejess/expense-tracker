@@ -19,6 +19,9 @@
     {% if selected_event %}
         <div class="card b-none">
             <h3 style="text-align: center;">{{ selected_event.name }}</h3>
+            {% if selected_event.notes %}
+                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; white-space: pre-wrap;">{{ selected_event.notes }}</p>
+            {% endif %}
             <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center;">
                 {% if selected_event.start_date and selected_event.end_date %}{{ selected_event.start_date }} &rarr; {{ selected_event.end_date }}{% else %}no date range{% endif %}
             </p>
