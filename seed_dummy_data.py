@@ -112,6 +112,7 @@ add_expense("2026-07-16", "food", 15.00, "cash", "breakfast before heading home"
 festival_id = add_event("City Music Festival", "#D4A5C4", "2026-08-12", "2026-08-13", budget=250.00, notes="Bought tickets early for the discount - keep receipts for merch in case of refund.")
 
 add_expense("2026-08-10", "entertainment", 90.00, "card", "festival tickets", 0, festival_id)
+add_earning("2026-08-12", "freelance", 30.00, "cash", "sold spare wristband to a friend")
 
 add_expense("2026-08-12", "transport", 12.00, "e-wallet", "grab to venue")
 add_expense("2026-08-12", "food", 22.00, "cash", "festival food stalls")
