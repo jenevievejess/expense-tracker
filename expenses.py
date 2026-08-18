@@ -196,13 +196,13 @@ def get_total_by_category_excluding_events(start_date=None, end_date=None):
     cursor = conn.cursor()
     if start_date and end_date:
         cursor.execute(
-            "SELECT category, SUM(amount) FROM expenses "
+            "SELECT category, SUM(amount - reimbursed) FROM expenses "
             "WHERE date BETWEEN ? AND ? AND event_id IS NULL GROUP BY category ORDER BY category",
             (start_date, end_date)
         )
     else:
         cursor.execute(
-            "SELECT category, SUM(amount) FROM expenses "
+            "SELECT category, SUM(amount - reimbursed) FROM expenses "
             "WHERE event_id IS NULL GROUP BY category ORDER BY category"
         )
     rows = cursor.fetchall()
@@ -234,13 +234,13 @@ def get_total_by_method_excluding_events(start_date=None, end_date=None):
     cursor = conn.cursor()
     if start_date and end_date:
         cursor.execute(
-            "SELECT method, SUM(amount) FROM expenses "
+            "SELECT method, SUM(amount - reimbursed) FROM expenses "
             "WHERE date BETWEEN ? AND ? AND event_id IS NULL GROUP BY method ORDER BY method",
             (start_date, end_date)
         )
     else:
         cursor.execute(
-            "SELECT method, SUM(amount) FROM expenses "
+            "SELECT method, SUM(amount - reimbursed) FROM expenses "
             "WHERE event_id IS NULL GROUP BY method ORDER BY method"
         )
     rows = cursor.fetchall()
