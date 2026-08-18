@@ -5,12 +5,14 @@
 
     <div class="tab-bar-row">
         {% if periods %}
-            <div class="period-selector">
-                {% for p in periods %}
-                    <a href="{{ url_for('budget_view', period_id=p.id) }}" class="{{ 'active' if selected_period and selected_period.id == p.id else '' }}">
-                        {{ p.label or (p.start_date ~ ' to ' ~ p.end_date) }}
-                    </a>
-                {% endfor %}
+            <div class="tab-scroll-wrap">
+                <div class="period-selector">
+                    {% for p in periods %}
+                        <a href="{{ url_for('budget_view', period_id=p.id) }}" class="{{ 'active' if selected_period and selected_period.id == p.id else '' }}">
+                            {{ p.label or (p.start_date ~ ' to ' ~ p.end_date) }}
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
             <a href="{{ url_for('budget_edit') }}" class="inline-add-btn">+ Add Budget</a>
         {% endif %}

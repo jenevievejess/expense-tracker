@@ -5,12 +5,14 @@
 
     <div class="tab-bar-row">
         {% if events %}
-            <div class="period-selector">
-                {% for e in events %}
-                    <a href="{{ url_for('events_view', event_id=e.id) }}" class="{{ 'active' if selected_event and selected_event.id == e.id else '' }}">
-                        {{ e.name }}
-                    </a>
-                {% endfor %}
+            <div class="tab-scroll-wrap">
+                <div class="period-selector">
+                    {% for e in events %}
+                        <a href="{{ url_for('events_view', event_id=e.id) }}" class="{{ 'active' if selected_event and selected_event.id == e.id else '' }}">
+                            {{ e.name }}
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
             <a href="{{ url_for('events_add') }}" class="inline-add-btn">+ Add Event</a>
         {% endif %}

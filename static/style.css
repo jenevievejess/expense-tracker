@@ -603,7 +603,34 @@ h1, h2, h3 { color: var(--text); margin-top: 0; }
 
 .b-left-green .progress-bar-track { background-color: var(--sage-light); }
 
-.period-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+.period-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-right: 28px;
+}
+
+.period-selector::-webkit-scrollbar { display: none; }
+
+.tab-scroll-wrap {
+    position: relative;
+    min-width: 0;
+    flex: 1;
+}
+
+.tab-scroll-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 36px;
+    background: linear-gradient(to right, rgba(251, 243, 231, 0), var(--bg) 75%);
+    pointer-events: none;
+}
 
 .tab-bar-row {
     display: flex;
@@ -623,6 +650,8 @@ h1, h2, h3 { color: var(--text); margin-top: 0; }
     color: var(--sage-dark);
     text-decoration: none;
     font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .period-selector a.active { background-color: var(--sage); color: var(--white); font-weight: 600; }
