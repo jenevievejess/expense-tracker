@@ -80,9 +80,10 @@ expense-tracker/
 
 ## Screenshots
  
-| Home | Expenses | Budget | Accounts |
-| ---- | -------- | ------ | -------- |
-| ![](screenshots/home.png)| ![](screenshots/expenses.png) | ![](screenshots/budget.png) | ![](screenshots/accounts.png) |
+| Home | Expenses | Budget | Accounts | Events |
+| ---- | -------- | ------ | -------- | ------ |
+| ![](screenshots/home.png)| ![](screenshots/expenses.png) | ![](screenshots/budget.png) | ![](screenshots/accounts.png) | ![](screenshots/events.png) |
+
 
 
 ## Future Improvements
